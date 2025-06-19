@@ -1,35 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { RootSection } from './presentation/components/RootSection';
+import { GetWorldClockUseCase } from './application/use-cases/GetWorldClockUseCase';
+import { WorldClockRepository } from './infrastructure/repositories/WorldClockRepository';
+import type { RootEntity } from './domain/entities/RootEntity';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [worldClockData, setWorldClockData] = useState<RootEntity | null>(null);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  useEffect(() => {
+    const fetchWorldClockData = async () => {
+      const repository = new WorldClockRepository();
+      const useCase = new GetWorldClockUseCase(repository);
+      const data = await useCase.execute();
+      setWorldClockData(data);
+    };
+
+    fetchWorldClockData();
+  }, []);
+
+  if (!worldClockData) {
+    return <div>Loading...</div>;
+  }
+
+  return <RootSection root={worldClockData} />;
 }
 
-export default App
+export default App;
