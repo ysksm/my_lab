@@ -135,6 +135,52 @@ app.get('/api/world-clock', (req, res) => {
 });
 
 /**
+ * 複数都市の時刻一括取得API
+ * @route POST /api/times
+ */
+app.post('/api/times', (req, res) => {
+  try {
+    const { timezones } = req.body;
+    
+    if (!Array.isArray(timezones)) {
+      return res.status(400).json({ error: 'Invalid request: timezones must be an array' });
+    }
+    
+    const now = new Date();
+    const timeData = {};
+    
+    for (const timezone of timezones) {
+      try {
+        const options = {
+          timeZone: timezone,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        };
+        const time = new Intl.DateTimeFormat('en-US', options).format(now);
+        
+        timeData[timezone] = {
+          time,
+          timezone,
+          timestamp: now.toISOString()
+        };
+      } catch (error) {
+        timeData[timezone] = {
+          time: 'Invalid timezone',
+          timezone,
+          timestamp: now.toISOString()
+        };
+      }
+    }
+    
+    res.json(timeData);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * 時刻取得API
  * 指定されたタイムゾーンの現在時刻を返す
  * 

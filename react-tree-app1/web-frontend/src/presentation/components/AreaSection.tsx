@@ -1,7 +1,7 @@
 import React from 'react';
 import type { AreaEntity } from '../../domain/entities/AreaEntity';
+import type { TimeResponse } from '../../infrastructure/repositories/TimeRepository';
 import { CountrySection } from './CountrySection';
-import styles from './AreaSection.module.css';
 
 /**
  * エリアセクションコンポーネントのプロパティ
@@ -9,6 +9,8 @@ import styles from './AreaSection.module.css';
 interface AreaSectionProps {
   /** エリアエンティティデータ */
   area: AreaEntity;
+  /** 全都市の時刻データ（タイムゾーンをキーとしたマップ） */
+  cityTimes: { [timezone: string]: TimeResponse };
 }
 
 /**
@@ -16,15 +18,15 @@ interface AreaSectionProps {
  * 地理的な地域（アジア、ヨーロッパなど）を表示するコンポーネント
  * 配下の国セクションを階層的に描画する
  */
-export const AreaSection: React.FC<AreaSectionProps> = ({ area }) => {
+export const AreaSection: React.FC<AreaSectionProps> = ({ area, cityTimes }) => {
   return (
-    <div className={styles.areaContainer}>
+    <div style={{ marginLeft: '20px', marginBottom: '16px' }}>
       {/* エリア名のヘッダー */}
-      <h2 className={styles.areaHeader}>{area.name}</h2>
+      <h2 style={{ fontSize: '20px', margin: '12px 0' }}>{area.name}</h2>
       
       {/* 各国セクションを描画 */}
       {area.countries.map(country => (
-        <CountrySection key={country.id} country={country} />
+        <CountrySection key={country.id} country={country} cityTimes={cityTimes} />
       ))}
     </div>
   );

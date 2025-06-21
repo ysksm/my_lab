@@ -102,7 +102,60 @@ app.get('/api/world-clock', (req, res) => {
 });
 
 /**
- * 時刻取得API
+ * 複数都市の時刻一括取得API
+ * 複数のタイムゾーンの現在時刻を一括で返す
+ * 
+ * @route POST /api/times
+ * @body {Object} リクエストボディ
+ * @body {string[]} timezones - タイムゾーン識別子の配列
+ * @returns {Object} 時刻情報のマップ（キー：タイムゾーン、値：時刻情報）
+ */
+app.post('/api/times', (req, res) => {
+  try {
+    const { timezones } = req.body;
+    
+    if (!Array.isArray(timezones)) {
+      return res.status(400).json({ error: 'Invalid request: timezones must be an array' });
+    }
+    
+    const now = new Date();
+    const timeData: { [timezone: string]: { time: string; timezone: string; timestamp: string } } = {};
+    
+    // 各タイムゾーンの時刻を計算
+    for (const timezone of timezones) {
+      try {
+        const options: Intl.DateTimeFormatOptions = {
+          timeZone: timezone,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        };
+        const time = new Intl.DateTimeFormat('en-US', options).format(now);
+        
+        timeData[timezone] = {
+          time,
+          timezone,
+          timestamp: now.toISOString()
+        };
+      } catch (error) {
+        // 無効なタイムゾーンの場合はエラー情報を含める
+        timeData[timezone] = {
+          time: 'Invalid timezone',
+          timezone,
+          timestamp: now.toISOString()
+        };
+      }
+    }
+    
+    res.json(timeData);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * 時刻取得API（単一）
  * 指定されたタイムゾーンの現在時刻を返す
  * 
  * @route GET /api/time/:timezone

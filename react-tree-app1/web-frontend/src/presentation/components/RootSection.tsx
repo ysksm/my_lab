@@ -1,5 +1,6 @@
 import React from 'react';
 import type { RootEntity } from '../../domain/entities/RootEntity';
+import type { TimeResponse } from '../../infrastructure/repositories/TimeRepository';
 import { AreaSection } from './AreaSection';
 
 /**
@@ -8,14 +9,16 @@ import { AreaSection } from './AreaSection';
 interface RootSectionProps {
   /** ルートエンティティデータ */
   root: RootEntity;
+  /** 全都市の時刻データ（タイムゾーンをキーとしたマップ） */
+  cityTimes: { [timezone: string]: TimeResponse };
 }
 
 /**
  * ルートセクションコンポーネント
  * 世界時計アプリケーションの最上位コンポーネント
- * ルートエンティティの情報を表示し、配下のエリアセクションを描画する
+ * 時刻データを下位コンポーネントに配布する
  */
-export const RootSection: React.FC<RootSectionProps> = ({ root }) => {
+export const RootSection: React.FC<RootSectionProps> = ({ root, cityTimes }) => {
   return (
     <div style={{ padding: '20px' }}>
       {/* アプリケーションのタイトル */}
@@ -23,7 +26,7 @@ export const RootSection: React.FC<RootSectionProps> = ({ root }) => {
       
       {/* 各エリアセクションを描画 */}
       {root.areas.map(area => (
-        <AreaSection key={area.id} area={area} />
+        <AreaSection key={area.id} area={area} cityTimes={cityTimes} />
       ))}
     </div>
   );
