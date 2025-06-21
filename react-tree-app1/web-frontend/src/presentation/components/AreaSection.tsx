@@ -1,6 +1,7 @@
 import React from 'react';
 import type { AreaEntity } from '../../domain/entities/AreaEntity';
 import { CountrySection } from './CountrySection';
+import styles from './AreaSection.module.css';
 
 /**
  * エリアセクションコンポーネントのプロパティ
@@ -17,9 +18,9 @@ interface AreaSectionProps {
  */
 export const AreaSection: React.FC<AreaSectionProps> = ({ area }) => {
   return (
-    <div style={{ marginLeft: '20px', marginBottom: '16px' }}>
+    <div className={styles.areaContainer}>
       {/* エリア名のヘッダー */}
-      <h2 style={{ fontSize: '20px', margin: '12px 0' }}>{area.name}</h2>
+      <h2 className={styles.areaHeader}>{area.name}</h2>
       
       {/* 各国セクションを描画 */}
       {area.countries.map(country => (
