@@ -1,6 +1,21 @@
 import type { RootEntity } from '../../domain/entities/RootEntity';
 
+/**
+ * 世界時計データリポジトリ
+ * 世界時計アプリケーションの階層構造データを提供する
+ * 現在はハードコードされたデータを返すが、将来的にはAPIやデータベースから取得可能
+ */
 export class WorldClockRepository {
+  /**
+   * 世界時計の階層構造データを取得する
+   * @returns ルートエンティティとその配下の全階層データ
+   * 
+   * データ構造：
+   * - ルート（World）
+   *   - エリア（Asia, Europe, America）
+   *     - 国（Japan, China, UK, France, USA）
+   *       - 都市（Tokyo, Osaka, Beijing, Shanghai, London, Paris, New York, Los Angeles）
+   */
   async getWorldClockData(): Promise<RootEntity> {
     return {
       id: 'world',
