@@ -1,23 +1,20 @@
 import React from 'react';
-import type { CityEntity } from '../../domain/entities/CityEntity';
-import type { TimeResponse } from '../../infrastructure/repositories/TimeRepository';
+import type { CityEntityWithTime } from '../../domain/entities/CityEntityWithTime';
 
 /**
  * 都市時刻コンポーネントのプロパティ
  */
 interface CityTimeProps {
-  /** 都市エンティティデータ */
-  city: CityEntity;
-  /** 時刻データ（上位コンポーネントから渡される） */
-  timeData?: TimeResponse;
+  /** 時刻情報を含む都市エンティティデータ */
+  city: CityEntityWithTime;
 }
 
 /**
  * 都市時刻コンポーネント
  * 都市名と現在時刻を表示する最下位のコンポーネント
- * 時刻データは上位コンポーネントから受け取る（自身では取得しない）
+ * 時刻データはエンティティ内に統合されている
  */
-export const CityTime: React.FC<CityTimeProps> = ({ city, timeData }) => {
+export const CityTime: React.FC<CityTimeProps> = ({ city }) => {
   return (
     <div style={{ marginLeft: '60px', padding: '8px', border: '1px solid #ddd', marginBottom: '4px' }}>
       {/* 都市名 */}
@@ -25,7 +22,7 @@ export const CityTime: React.FC<CityTimeProps> = ({ city, timeData }) => {
       
       {/* 時刻表示 */}
       <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>
-        {timeData ? timeData.time : 'Loading...'}
+        {city.currentTime || 'Loading...'}
       </p>
     </div>
   );

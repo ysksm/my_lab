@@ -4,20 +4,24 @@ import { GetWorldClockUseCase } from './application/use-cases/GetWorldClockUseCa
 import { GetAllCityTimesUseCase } from './application/use-cases/GetAllCityTimesUseCase';
 import { WorldClockRepository } from './infrastructure/repositories/WorldClockRepository';
 import { TimeRepository } from './infrastructure/repositories/TimeRepository';
+import { mergeTimeData } from './application/utils/mergeTimeData';
 import type { RootEntity } from './domain/entities/RootEntity';
+import type { RootEntityWithTime } from './domain/entities/RootEntityWithTime';
 import type { TimeResponse } from './infrastructure/repositories/TimeRepository';
 import './App.css';
 
 /**
  * アプリケーションのメインコンポーネント
  * 世界時計アプリケーションのエントリーポイント
- * 階層構造データと全都市の時刻を取得し、下位コンポーネントに渡す
+ * 階層構造データと全都市の時刻を取得し、統合したデータを下位コンポーネントに渡す
  */
 function App() {
   /** 世界時計データの状態 */
   const [worldClockData, setWorldClockData] = useState<RootEntity | null>(null);
   /** 全都市の時刻データの状態（タイムゾーンをキーとしたマップ） */
   const [cityTimes, setCityTimes] = useState<{ [timezone: string]: TimeResponse }>({});
+  /** 時刻情報が統合された世界時計データ */
+  const [mergedData, setMergedData] = useState<RootEntityWithTime | null>(null);
 
   useEffect(() => {
     /**
@@ -71,16 +75,23 @@ function App() {
     return () => clearInterval(interval);
   }, [worldClockData]);
 
+  // 世界時計データと時刻データをマージ
+  useEffect(() => {
+    if (worldClockData && Object.keys(cityTimes).length > 0) {
+      const merged = mergeTimeData(worldClockData, cityTimes);
+      setMergedData(merged);
+    }
+  }, [worldClockData, cityTimes]);
+
   // データがまだ取得されていない場合はローディング表示
-  if (!worldClockData) {
+  if (!mergedData) {
     return <div>Loading...</div>;
   }
   
-  console.log('Rendering World Clock Data:', worldClockData);
-  console.log('City Times:', cityTimes);
+  console.log('Rendering Merged World Clock Data:', mergedData);
   
-  // 取得したデータをルートセクションコンポーネントに渡して描画
-  return <RootSection root={worldClockData} cityTimes={cityTimes} />;
+  // 統合されたデータをルートセクションコンポーネントに渡して描画
+  return <RootSection root={mergedData} />;
 }
 
 export default App;

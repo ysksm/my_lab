@@ -1,24 +1,21 @@
 import React from 'react';
-import type { RootEntity } from '../../domain/entities/RootEntity';
-import type { TimeResponse } from '../../infrastructure/repositories/TimeRepository';
+import type { RootEntityWithTime } from '../../domain/entities/RootEntityWithTime';
 import { AreaSection } from './AreaSection';
 
 /**
  * ルートセクションコンポーネントのプロパティ
  */
 interface RootSectionProps {
-  /** ルートエンティティデータ */
-  root: RootEntity;
-  /** 全都市の時刻データ（タイムゾーンをキーとしたマップ） */
-  cityTimes: { [timezone: string]: TimeResponse };
+  /** 時刻情報を含むルートエンティティデータ */
+  root: RootEntityWithTime;
 }
 
 /**
  * ルートセクションコンポーネント
  * 世界時計アプリケーションの最上位コンポーネント
- * 時刻データを下位コンポーネントに配布する
+ * 時刻情報が統合されたデータを下位コンポーネントに渡す
  */
-export const RootSection: React.FC<RootSectionProps> = ({ root, cityTimes }) => {
+export const RootSection: React.FC<RootSectionProps> = ({ root }) => {
   return (
     <div style={{ padding: '20px' }}>
       {/* アプリケーションのタイトル */}
@@ -26,7 +23,7 @@ export const RootSection: React.FC<RootSectionProps> = ({ root, cityTimes }) => 
       
       {/* 各エリアセクションを描画 */}
       {root.areas.map(area => (
-        <AreaSection key={area.id} area={area} cityTimes={cityTimes} />
+        <AreaSection key={area.id} area={area} />
       ))}
     </div>
   );

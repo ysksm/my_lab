@@ -1,16 +1,13 @@
 import React from 'react';
-import type { CountryEntity } from '../../domain/entities/CountryEntity';
-import type { TimeResponse } from '../../infrastructure/repositories/TimeRepository';
+import type { CountryEntityWithTime } from '../../domain/entities/CountryEntityWithTime';
 import { CityTime } from './CityTime';
 
 /**
  * 国セクションコンポーネントのプロパティ
  */
 interface CountrySectionProps {
-  /** 国エンティティデータ */
-  country: CountryEntity;
-  /** 全都市の時刻データ（タイムゾーンをキーとしたマップ） */
-  cityTimes: { [timezone: string]: TimeResponse };
+  /** 時刻情報を含む国エンティティデータ */
+  country: CountryEntityWithTime;
 }
 
 /**
@@ -18,7 +15,7 @@ interface CountrySectionProps {
  * 国（日本、アメリカなど）を表示するコンポーネント
  * 配下の都市時刻コンポーネントを階層的に描画する
  */
-export const CountrySection: React.FC<CountrySectionProps> = ({ country, cityTimes }) => {
+export const CountrySection: React.FC<CountrySectionProps> = ({ country }) => {
   return (
     <div style={{ marginLeft: '40px', marginBottom: '12px' }}>
       {/* 国名のヘッダー */}
@@ -28,8 +25,7 @@ export const CountrySection: React.FC<CountrySectionProps> = ({ country, cityTim
       {country.cities.map(city => (
         <CityTime 
           key={city.id} 
-          city={city} 
-          timeData={cityTimes[city.timezone]}
+          city={city}
         />
       ))}
     </div>
