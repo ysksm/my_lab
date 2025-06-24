@@ -5,18 +5,26 @@ export const Breadcrumb = () => {
   const { breadcrumbs } = useBreadcrumb();
 
   return (
-    <ul className="breadcrumb">
-      {breadcrumbs.map((breadcrumb) => {
-        return (
-          <li key={`breadcrumb-${breadcrumb.label}`}>
-            {breadcrumb.href ? (
-              <Link to={breadcrumb.href}>{breadcrumb.label}</Link>
-            ) : (
-              <span>{breadcrumb.label}</span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <nav className="bg-white px-6 py-3 border-b border-gray-200">
+      <ol className="flex items-center space-x-2">
+        {breadcrumbs.map((breadcrumb, index) => {
+          return (
+            <li key={`breadcrumb-${breadcrumb.label}`} className="flex items-center">
+              {index > 0 && <span className="mx-2 text-gray-400">/</span>}
+              {breadcrumb.href ? (
+                <Link
+                  to={breadcrumb.href}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  {breadcrumb.label}
+                </Link>
+              ) : (
+                <span className="text-gray-700">{breadcrumb.label}</span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 };

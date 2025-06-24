@@ -7,8 +7,10 @@ import routerBindings, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import dataProvider from "@refinedev/simple-rest";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, Outlet } from "react-router";
 import "./App.css";
+import { Layout } from "./components/layout";
+import { TodoList, TodoCreate, TodoEdit, TodoShow } from "./pages/todos";
 
 function App() {
   return (
@@ -19,6 +21,18 @@ function App() {
           <Refine
             dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
             routerProvider={routerBindings}
+            resources={[
+              {
+                name: "todos",
+                list: "/todos",
+                create: "/todos/create",
+                edit: "/todos/edit/:id",
+                show: "/todos/show/:id",
+                meta: {
+                  canDelete: true,
+                },
+              },
+            ]}
             options={{
               syncWithLocation: true,
               warnWhenUnsavedChanges: true,
@@ -27,7 +41,21 @@ function App() {
             }}
           >
             <Routes>
-              <Route index element={<WelcomePage />} />
+              <Route
+                element={
+                  <Layout>
+                    <Outlet />
+                  </Layout>
+                }
+              >
+                <Route index element={<WelcomePage />} />
+                <Route path="/todos">
+                  <Route index element={<TodoList />} />
+                  <Route path="create" element={<TodoCreate />} />
+                  <Route path="edit/:id" element={<TodoEdit />} />
+                  <Route path="show/:id" element={<TodoShow />} />
+                </Route>
+              </Route>
             </Routes>
             <RefineKbar />
             <UnsavedChangesNotifier />
