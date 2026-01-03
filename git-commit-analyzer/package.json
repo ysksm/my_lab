@@ -1,0 +1,16 @@
+{
+  "name": "git-commit-analyzer",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "duckdb-async": "^1.4.2",
+    "simple-git": "^3.30.0"
+  }
+}
