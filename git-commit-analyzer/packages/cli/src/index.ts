@@ -1,15 +1,18 @@
 #!/usr/bin/env bun
 
-import { GitDatabase } from "./src/db";
-import { GitImporter } from "./src/git";
-import { GitAnalyzer } from "./src/analyzer";
 import { resolve } from "path";
+import {
+  DuckDBCommitRepository,
+  SimpleGitRepository,
+  ImportCommitsUseCase,
+  AnalyzeCommitsUseCase,
+} from "../../core/src";
 
 const HELP_TEXT = `
-Git Commit Database Analyzer
-============================
+Git Commit Database Analyzer (CLI)
+===================================
 
-Usage: bun run index.ts <command> [options]
+Usage: bun run start <command> [options]
 
 Commands:
   import <repo-path>           Git履歴をデータベースにインポート
@@ -29,16 +32,17 @@ Options:
   --help, -h                   このヘルプを表示
 
 Examples:
-  bun run index.ts import .
-  bun run index.ts hotspots --limit=10
-  bun run index.ts history src/main.ts
-  bun run index.ts risk --limit=15
-  bun run index.ts query "SELECT * FROM commits LIMIT 5"
+  bun run start import .
+  bun run start hotspots --limit=10
+  bun run start history src/main.ts
+  bun run start risk --limit=15
 `;
 
-function parseArgs(
-  args: string[]
-): { command: string; positional: string[]; options: Record<string, string> } {
+function parseArgs(args: string[]): {
+  command: string;
+  positional: string[];
+  options: Record<string, string>;
+} {
   const options: Record<string, string> = {};
   const positional: string[] = [];
   let command = "";
@@ -59,10 +63,7 @@ function parseArgs(
   return { command, positional, options };
 }
 
-function formatTable(
-  rows: Record<string, unknown>[],
-  columns?: string[]
-): string {
+function formatTable(rows: Record<string, unknown>[], columns?: string[]): string {
   if (rows.length === 0) return "No results found.";
 
   const cols = columns || Object.keys(rows[0]);
@@ -79,9 +80,7 @@ function formatTable(
   const header = cols.map((c) => c.padEnd(widths[c])).join(" | ");
   const separator = cols.map((c) => "-".repeat(widths[c])).join("-+-");
   const body = rows
-    .map((row) =>
-      cols.map((c) => String(row[c] ?? "").padEnd(widths[c])).join(" | ")
-    )
+    .map((row) => cols.map((c) => String(row[c] ?? "").padEnd(widths[c])).join(" | "))
     .join("\n");
 
   return `${header}\n${separator}\n${body}`;
@@ -97,10 +96,10 @@ async function main(): Promise<void> {
   }
 
   const dbPath = options["db"] || "git_commits.duckdb";
-  const db = new GitDatabase(dbPath);
-  await db.init();
+  const commitRepository = new DuckDBCommitRepository(dbPath);
+  await commitRepository.init();
 
-  const analyzer = new GitAnalyzer(db);
+  const analyzeUseCase = new AnalyzeCommitsUseCase(commitRepository);
 
   try {
     switch (command) {
@@ -109,34 +108,33 @@ async function main(): Promise<void> {
         const absolutePath = resolve(repoPath);
         console.log(`Importing git history from: ${absolutePath}`);
 
-        const importer = new GitImporter(absolutePath, db);
-        const repoName = await importer.getRepoName();
-        console.log(`Repository: ${repoName}`);
+        const gitRepository = new SimpleGitRepository(absolutePath);
+        const importUseCase = new ImportCommitsUseCase(commitRepository, gitRepository);
 
-        const imported = await importer.importAllCommits((progress) => {
-          process.stdout.write(
-            `\rProgress: ${progress.current}/${progress.total} commits`
-          );
+        const result = await importUseCase.execute((progress) => {
+          process.stdout.write(`\rProgress: ${progress.current}/${progress.total} commits`);
         });
 
-        console.log(`\nImported ${imported} new commits.`);
-        const total = await db.getCommitCount();
-        console.log(`Total commits in database: ${total}`);
+        console.log(`\nRepository: ${result.repoName}`);
+        console.log(`Imported ${result.importedCount} new commits.`);
+        console.log(`Total commits in database: ${await commitRepository.getCommitCount()}`);
         break;
       }
 
       case "hotspots": {
         const limit = parseInt(options["limit"] || "20");
         console.log(`\n=== Hotspots (Top ${limit} frequently changed files) ===\n`);
-        const results = await analyzer.getHotspots(limit);
+        const results = await analyzeUseCase.getHotspots(limit);
         console.log(
-          formatTable(results, [
-            "file_path",
-            "change_count",
-            "total_insertions",
-            "total_deletions",
-            "churn",
-          ])
+          formatTable(
+            results.map((r) => ({
+              file_path: r.filePath,
+              change_count: r.changeCount,
+              total_insertions: r.totalInsertions,
+              total_deletions: r.totalDeletions,
+              churn: r.churn,
+            }))
+          )
         );
         break;
       }
@@ -144,15 +142,17 @@ async function main(): Promise<void> {
       case "bugfixes": {
         const limit = parseInt(options["limit"] || "30");
         console.log(`\n=== Bug Fix Commits (Latest ${limit}) ===\n`);
-        const results = await analyzer.findBugFixCommits(limit);
+        const results = await analyzeUseCase.findBugFixCommits(limit);
         console.log(
-          formatTable(results, [
-            "hash",
-            "date",
-            "author_name",
-            "files_changed",
-            "message",
-          ])
+          formatTable(
+            results.map((r) => ({
+              hash: r.hash.substring(0, 7),
+              date: r.date,
+              author_name: r.authorName,
+              files_changed: r.filesChanged,
+              message: r.message,
+            }))
+          )
         );
         break;
       }
@@ -165,17 +165,19 @@ async function main(): Promise<void> {
         }
         const limit = parseInt(options["limit"] || "50");
         console.log(`\n=== File History: ${filePath} ===\n`);
-        const results = await analyzer.getFileHistory(filePath, limit);
+        const results = await analyzeUseCase.getFileHistory(filePath, limit);
         console.log(
-          formatTable(results, [
-            "hash",
-            "date",
-            "author_name",
-            "change_type",
-            "insertions",
-            "deletions",
-            "message",
-          ])
+          formatTable(
+            results.map((r) => ({
+              hash: r.hash.substring(0, 7),
+              date: r.date,
+              author_name: r.authorName,
+              change_type: r.changeType,
+              insertions: r.insertions,
+              deletions: r.deletions,
+              message: r.message,
+            }))
+          )
         );
         break;
       }
@@ -184,29 +186,33 @@ async function main(): Promise<void> {
         const minCoupling = parseInt(options["min"] || "3");
         const limit = parseInt(options["limit"] || "30");
         console.log(`\n=== Coupled Files (min ${minCoupling} co-changes) ===\n`);
-        const results = await analyzer.getCoupledFiles(minCoupling, limit);
+        const results = await analyzeUseCase.getCoupledFiles(minCoupling, limit);
         console.log(
-          formatTable(results, [
-            "file1",
-            "file2",
-            "coupling_count",
-            "coupling_percentage",
-          ])
+          formatTable(
+            results.map((r) => ({
+              file1: r.file1,
+              file2: r.file2,
+              coupling_count: r.couplingCount,
+              coupling_percentage: r.couplingPercentage,
+            }))
+          )
         );
         break;
       }
 
       case "authors": {
         console.log("\n=== Author Statistics ===\n");
-        const results = await analyzer.getAuthorStats();
+        const results = await analyzeUseCase.getAuthorStats();
         console.log(
-          formatTable(results, [
-            "author_name",
-            "commit_count",
-            "files_touched",
-            "total_insertions",
-            "total_deletions",
-          ])
+          formatTable(
+            results.map((r) => ({
+              author_name: r.authorName,
+              commit_count: r.commitCount,
+              files_touched: r.filesTouched,
+              total_insertions: r.totalInsertions,
+              total_deletions: r.totalDeletions,
+            }))
+          )
         );
         break;
       }
@@ -215,15 +221,17 @@ async function main(): Promise<void> {
         const minChurn = parseInt(options["min"] || "100");
         const limit = parseInt(options["limit"] || "20");
         console.log(`\n=== High Churn Files (min ${minChurn} lines changed) ===\n`);
-        const results = await analyzer.getHighChurnFiles(minChurn, limit);
+        const results = await analyzeUseCase.getHighChurnFiles(minChurn, limit);
         console.log(
-          formatTable(results, [
-            "file_path",
-            "change_count",
-            "total_insertions",
-            "total_deletions",
-            "churn",
-          ])
+          formatTable(
+            results.map((r) => ({
+              file_path: r.filePath,
+              change_count: r.changeCount,
+              total_insertions: r.totalInsertions,
+              total_deletions: r.totalDeletions,
+              churn: r.churn,
+            }))
+          )
         );
         break;
       }
@@ -231,16 +239,18 @@ async function main(): Promise<void> {
       case "risk": {
         const limit = parseInt(options["limit"] || "20");
         console.log(`\n=== Bug Risk Prediction (Top ${limit}) ===\n`);
-        const results = await analyzer.getBugPredictionScores(limit);
+        const results = await analyzeUseCase.getBugPredictionScores(limit);
         console.log(
-          formatTable(results, [
-            "file_path",
-            "change_frequency",
-            "churn",
-            "bug_fix_count",
-            "author_count",
-            "risk_score",
-          ])
+          formatTable(
+            results.map((r) => ({
+              file_path: r.filePath,
+              change_frequency: r.changeFrequency,
+              churn: r.churn,
+              bug_fix_count: r.bugFixCount,
+              author_count: r.authorCount,
+              risk_score: r.riskScore,
+            }))
+          )
         );
         break;
       }
@@ -252,24 +262,25 @@ async function main(): Promise<void> {
           process.exit(1);
         }
         console.log(`\n=== Commit Details: ${hash} ===\n`);
-        const commitInfo = await db.query<{
-          hash: string;
-          author_name: string;
-          date: string;
-          message: string;
-        }>("SELECT * FROM commits WHERE hash LIKE ?", `${hash}%`);
-        if (commitInfo.length === 0) {
+        const result = await analyzeUseCase.getCommitDetails(hash);
+        if (!result) {
           console.log("Commit not found.");
           break;
         }
-        console.log(`Hash:    ${commitInfo[0].hash}`);
-        console.log(`Author:  ${commitInfo[0].author_name}`);
-        console.log(`Date:    ${commitInfo[0].date}`);
-        console.log(`Message: ${commitInfo[0].message}`);
+        console.log(`Hash:    ${result.commit.hash}`);
+        console.log(`Author:  ${result.commit.authorName}`);
+        console.log(`Date:    ${result.commit.date.toISOString()}`);
+        console.log(`Message: ${result.commit.message}`);
         console.log("\nFiles changed:");
-        const files = await analyzer.getCommitFiles(commitInfo[0].hash);
         console.log(
-          formatTable(files, ["file_path", "change_type", "insertions", "deletions"])
+          formatTable(
+            result.files.map((f) => ({
+              file_path: f.filePath,
+              change_type: f.changeType,
+              insertions: f.insertions,
+              deletions: f.deletions,
+            }))
+          )
         );
         break;
       }
@@ -281,29 +292,19 @@ async function main(): Promise<void> {
           process.exit(1);
         }
         console.log("\n=== Custom Query Results ===\n");
-        const results = await analyzer.executeCustomQuery<Record<string, unknown>>(sql);
+        const results = await analyzeUseCase.executeCustomQuery<Record<string, unknown>>(sql);
         console.log(formatTable(results));
         break;
       }
 
       case "stats": {
         console.log("\n=== Database Statistics ===\n");
-        const commitCount = await db.getCommitCount();
-        const fileChangeCount = await db.query<{ count: number }>(
-          "SELECT COUNT(*) as count FROM file_changes"
-        );
-        const uniqueFiles = await db.query<{ count: number }>(
-          "SELECT COUNT(DISTINCT file_path) as count FROM file_changes"
-        );
-        const dateRange = await db.query<{ min_date: string; max_date: string }>(
-          "SELECT MIN(date) as min_date, MAX(date) as max_date FROM commits"
-        );
-
-        console.log(`Total commits:        ${commitCount}`);
-        console.log(`Total file changes:   ${fileChangeCount[0]?.count || 0}`);
-        console.log(`Unique files tracked: ${uniqueFiles[0]?.count || 0}`);
-        if (dateRange[0]?.min_date) {
-          console.log(`Date range:           ${dateRange[0].min_date} to ${dateRange[0].max_date}`);
+        const stats = await analyzeUseCase.getDatabaseStats();
+        console.log(`Total commits:        ${stats.totalCommits}`);
+        console.log(`Total file changes:   ${stats.totalFileChanges}`);
+        console.log(`Unique files tracked: ${stats.uniqueFilesTracked}`);
+        if (stats.dateRange.minDate) {
+          console.log(`Date range:           ${stats.dateRange.minDate} to ${stats.dateRange.maxDate}`);
         }
         break;
       }
@@ -314,7 +315,7 @@ async function main(): Promise<void> {
         process.exit(1);
     }
   } finally {
-    await db.close();
+    await commitRepository.close();
   }
 }
 

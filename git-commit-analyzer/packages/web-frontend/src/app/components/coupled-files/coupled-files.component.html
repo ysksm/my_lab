@@ -1,0 +1,50 @@
+<div class="coupled-files">
+  <div class="header">
+    <h2>Coupled Files - Co-changed Together</h2>
+    <div class="controls">
+      <label>
+        Min Coupling:
+        <input type="number" [(ngModel)]="minCoupling" (change)="loadCoupledFiles()" min="1" />
+      </label>
+      <label>
+        Limit:
+        <input type="number" [(ngModel)]="limit" (change)="loadCoupledFiles()" min="1" max="100" />
+      </label>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && coupledFiles.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>File 1</th>
+          <th>File 2</th>
+          <th>Co-changes</th>
+          <th>Coupling %</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (pair of coupledFiles; track pair.file1 + pair.file2) {
+          <tr>
+            <td class="file-path">{{ pair.file1 }}</td>
+            <td class="file-path">{{ pair.file2 }}</td>
+            <td class="number">{{ pair.couplingCount }}</td>
+            <td class="number">{{ pair.couplingPercentage }}%</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && coupledFiles.length === 0) {
+    <div class="empty">No coupled files found with the specified threshold</div>
+  }
+</div>

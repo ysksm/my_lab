@@ -1,0 +1,54 @@
+<div class="risk-analysis">
+  <div class="header">
+    <h2>Bug Risk Prediction</h2>
+    <div class="controls">
+      <label>
+        Limit:
+        <input type="number" [(ngModel)]="limit" (change)="loadRisks()" min="1" max="100" />
+      </label>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && risks.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>File Path</th>
+          <th>Changes</th>
+          <th>Churn</th>
+          <th>Bug Fixes</th>
+          <th>Authors</th>
+          <th>Risk Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (risk of risks; track risk.filePath) {
+          <tr>
+            <td class="file-path">{{ risk.filePath }}</td>
+            <td class="number">{{ risk.changeFrequency }}</td>
+            <td class="number">{{ risk.churn }}</td>
+            <td class="number">{{ risk.bugFixCount }}</td>
+            <td class="number">{{ risk.authorCount }}</td>
+            <td class="number">
+              <span class="risk-badge" [class]="getRiskLevel(risk.riskScore)">
+                {{ risk.riskScore }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && risks.length === 0) {
+    <div class="empty">No data available</div>
+  }
+</div>
