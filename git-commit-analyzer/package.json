@@ -1,15 +1,14 @@
 {
   "name": "git-commit-analyzer",
   "private": true,
-  "workspaces": [
-    "packages/core",
-    "packages/cli",
-    "packages/web-backend"
-  ],
   "scripts": {
     "cli": "bun run --cwd packages/cli start",
     "server": "bun run --cwd packages/web-backend start",
     "frontend": "npm run --prefix packages/web-frontend start"
+  },
+  "dependencies": {
+    "duckdb-async": "^1.4.2",
+    "simple-git": "^3.30.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
