@@ -4,7 +4,7 @@ import {
   SimpleGitRepository,
   ImportCommitsUseCase,
   AnalyzeCommitsUseCase,
-} from "../../core/src";
+} from "../../core/src/index.ts";
 
 const PORT = process.env.PORT || 3000;
 const DB_PATH = process.env.DB_PATH || "git_commits.duckdb";

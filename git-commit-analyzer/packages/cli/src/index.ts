@@ -6,7 +6,7 @@ import {
   SimpleGitRepository,
   ImportCommitsUseCase,
   AnalyzeCommitsUseCase,
-} from "../../core/src";
+} from "../../core/src/index.ts";
 
 const HELP_TEXT = `
 Git Commit Database Analyzer (CLI)

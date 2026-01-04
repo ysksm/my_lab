@@ -1,7 +1,7 @@
 import { Database } from "duckdb-async";
-import type { ICommitRepository } from "../../domain/repositories/ICommitRepository";
-import { Commit } from "../../domain/entities/Commit";
-import { FileChange, type ChangeType } from "../../domain/entities/FileChange";
+import type { ICommitRepository } from "../../domain/repositories/ICommitRepository.ts";
+import { Commit } from "../../domain/entities/Commit.ts";
+import { FileChange, type ChangeType } from "../../domain/entities/FileChange.ts";
 import type {
   HotspotResult,
   BugFixCommit,
@@ -10,7 +10,7 @@ import type {
   AuthorStats,
   BugRiskScore,
   DatabaseStats,
-} from "../../domain/value-objects/AnalysisResult";
+} from "../../domain/value-objects/AnalysisResult.ts";
 
 export class DuckDBCommitRepository implements ICommitRepository {
   private db: Database | null = null;
@@ -81,10 +81,13 @@ export class DuckDBCommitRepository implements ICommitRepository {
   }
 
   async close(): Promise<void> {
-    if (this.db) {
-      await this.db.close();
-      this.db = null;
-    }
+    // DuckDB close() causes segfault with Bun runtime.
+    // Since DuckDB automatically persists data to disk on each write,
+    // we simply release the reference without calling close().
+    // This is safe because:
+    // 1. All data is already persisted (DuckDB is ACID compliant)
+    // 2. The process will release resources on exit anyway
+    this.db = null;
   }
 
   async saveCommit(commit: Commit): Promise<void> {

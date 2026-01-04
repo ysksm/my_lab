@@ -1,8 +1,8 @@
 // Domain
-export * from "./domain";
+export * from "./domain/index.ts";
 
 // Application
-export * from "./application";
+export * from "./application/index.ts";
 
 // Infrastructure
-export * from "./infrastructure";
+export * from "./infrastructure/index.ts";

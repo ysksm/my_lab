@@ -1,5 +1,5 @@
-import type { Commit } from "../entities/Commit";
-import type { FileChange } from "../entities/FileChange";
+import type { Commit } from "../entities/Commit.ts";
+import type { FileChange } from "../entities/FileChange.ts";
 import type {
   HotspotResult,
   BugFixCommit,
@@ -8,7 +8,7 @@ import type {
   AuthorStats,
   BugRiskScore,
   DatabaseStats,
-} from "../value-objects/AnalysisResult";
+} from "../value-objects/AnalysisResult.ts";
 
 export interface ICommitRepository {
   // 基本操作

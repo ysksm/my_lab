@@ -1,2 +1,2 @@
-export { DuckDBCommitRepository } from "./repositories/DuckDBCommitRepository";
-export { SimpleGitRepository } from "./repositories/SimpleGitRepository";
+export { DuckDBCommitRepository } from "./repositories/DuckDBCommitRepository.ts";
+export { SimpleGitRepository } from "./repositories/SimpleGitRepository.ts";

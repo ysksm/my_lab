@@ -1,6 +1,6 @@
-import type { ICommitRepository } from "../../domain/repositories/ICommitRepository";
-import type { IGitRepository } from "../../domain/repositories/IGitRepository";
-import type { ImportProgress } from "../../domain/value-objects/AnalysisResult";
+import type { ICommitRepository } from "../../domain/repositories/ICommitRepository.ts";
+import type { IGitRepository } from "../../domain/repositories/IGitRepository.ts";
+import type { ImportProgress } from "../../domain/value-objects/AnalysisResult.ts";
 
 export interface ImportResult {
   importedCount: number;
@@ -9,10 +9,13 @@ export interface ImportResult {
 }
 
 export class ImportCommitsUseCase {
-  constructor(
-    private readonly commitRepository: ICommitRepository,
-    private readonly gitRepository: IGitRepository
-  ) {}
+  private commitRepository: ICommitRepository;
+  private gitRepository: IGitRepository;
+
+  constructor(commitRepository: ICommitRepository, gitRepository: IGitRepository) {
+    this.commitRepository = commitRepository;
+    this.gitRepository = gitRepository;
+  }
 
   async execute(
     onProgress?: (progress: ImportProgress) => void

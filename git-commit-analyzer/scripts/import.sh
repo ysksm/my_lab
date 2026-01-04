@@ -18,4 +18,4 @@ echo "Database: $DB_PATH"
 echo ""
 
 cd "$ROOT_DIR/packages/cli"
-bun run src/index.ts import "$REPO_PATH" --db="$DB_PATH"
+node --experimental-strip-types src/index.ts import "$REPO_PATH" --db="$DB_PATH"

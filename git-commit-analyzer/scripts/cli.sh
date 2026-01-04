@@ -30,4 +30,4 @@ if [ $# -eq 0 ]; then
 fi
 
 cd "$ROOT_DIR/packages/cli"
-bun run src/index.ts "$@" --db="$DB_PATH"
+node --experimental-strip-types src/index.ts "$@" --db="$DB_PATH"

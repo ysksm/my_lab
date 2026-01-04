@@ -1,6 +1,6 @@
-import type { Commit } from "../entities/Commit";
-import type { FileChange } from "../entities/FileChange";
-import type { ImportProgress } from "../value-objects/AnalysisResult";
+import type { Commit } from "../entities/Commit.ts";
+import type { FileChange } from "../entities/FileChange.ts";
+import type { ImportProgress } from "../value-objects/AnalysisResult.ts";
 
 export interface CommitWithChanges {
   commit: Commit;

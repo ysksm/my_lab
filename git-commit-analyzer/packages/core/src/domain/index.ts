@@ -1,6 +1,6 @@
 // Entities
-export { Commit, type CommitProps } from "./entities/Commit";
-export { FileChange, type FileChangeProps, type ChangeType } from "./entities/FileChange";
+export { Commit, type CommitProps } from "./entities/Commit.ts";
+export { FileChange, type FileChangeProps, type ChangeType } from "./entities/FileChange.ts";
 
 // Value Objects
 export type {
@@ -12,8 +12,8 @@ export type {
   BugRiskScore,
   DatabaseStats,
   ImportProgress,
-} from "./value-objects/AnalysisResult";
+} from "./value-objects/AnalysisResult.ts";
 
 // Repository Interfaces
-export type { ICommitRepository } from "./repositories/ICommitRepository";
-export type { IGitRepository, CommitWithChanges } from "./repositories/IGitRepository";
+export type { ICommitRepository } from "./repositories/ICommitRepository.ts";
+export type { IGitRepository, CommitWithChanges } from "./repositories/IGitRepository.ts";

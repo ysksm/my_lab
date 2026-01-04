@@ -1,4 +1,4 @@
-import type { ICommitRepository } from "../../domain/repositories/ICommitRepository";
+import type { ICommitRepository } from "../../domain/repositories/ICommitRepository.ts";
 import type {
   HotspotResult,
   BugFixCommit,
@@ -7,12 +7,16 @@ import type {
   AuthorStats,
   BugRiskScore,
   DatabaseStats,
-} from "../../domain/value-objects/AnalysisResult";
-import type { Commit } from "../../domain/entities/Commit";
-import type { FileChange } from "../../domain/entities/FileChange";
+} from "../../domain/value-objects/AnalysisResult.ts";
+import type { Commit } from "../../domain/entities/Commit.ts";
+import type { FileChange } from "../../domain/entities/FileChange.ts";
 
 export class AnalyzeCommitsUseCase {
-  constructor(private readonly commitRepository: ICommitRepository) {}
+  private commitRepository: ICommitRepository;
+
+  constructor(commitRepository: ICommitRepository) {
+    this.commitRepository = commitRepository;
+  }
 
   async getHotspots(limit: number = 20): Promise<HotspotResult[]> {
     return this.commitRepository.getHotspots(limit);

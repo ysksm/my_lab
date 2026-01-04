@@ -1,8 +1,8 @@
 import simpleGit, { type SimpleGit, type LogResult } from "simple-git";
-import type { IGitRepository, CommitWithChanges } from "../../domain/repositories/IGitRepository";
-import { Commit } from "../../domain/entities/Commit";
-import { FileChange, type ChangeType } from "../../domain/entities/FileChange";
-import type { ImportProgress } from "../../domain/value-objects/AnalysisResult";
+import type { IGitRepository, CommitWithChanges } from "../../domain/repositories/IGitRepository.ts";
+import { Commit } from "../../domain/entities/Commit.ts";
+import { FileChange, type ChangeType } from "../../domain/entities/FileChange.ts";
+import type { ImportProgress } from "../../domain/value-objects/AnalysisResult.ts";
 
 export class SimpleGitRepository implements IGitRepository {
   private git: SimpleGit;
