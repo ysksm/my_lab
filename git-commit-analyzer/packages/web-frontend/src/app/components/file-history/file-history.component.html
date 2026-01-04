@@ -1,0 +1,55 @@
+<div class="file-history">
+  <h2>File Change History</h2>
+
+  <div class="search-form">
+    <input
+      type="text"
+      [(ngModel)]="filePath"
+      placeholder="Enter file path (e.g., src/app/main.ts)"
+      (keyup.enter)="searchHistory()"
+    />
+    <button (click)="searchHistory()" [disabled]="loading">Search</button>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && history.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Hash</th>
+          <th>Date</th>
+          <th>Author</th>
+          <th>Type</th>
+          <th>+/-</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (entry of history; track entry.hash) {
+          <tr>
+            <td class="hash">{{ entry.hash.substring(0, 7) }}</td>
+            <td>{{ entry.date | date:'short' }}</td>
+            <td>{{ entry.authorName }}</td>
+            <td class="change-type">{{ entry.changeType }}</td>
+            <td class="changes">
+              <span class="insertions">+{{ entry.insertions }}</span>
+              <span class="deletions">-{{ entry.deletions }}</span>
+            </td>
+            <td class="message">{{ entry.message }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && history.length === 0 && filePath) {
+    <div class="empty">No history found for this file</div>
+  }
+</div>

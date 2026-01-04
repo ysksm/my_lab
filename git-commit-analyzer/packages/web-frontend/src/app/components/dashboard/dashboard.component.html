@@ -1,0 +1,36 @@
+<div class="dashboard">
+  <h2>Database Statistics</h2>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (stats) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.totalCommits }}</div>
+        <div class="stat-label">Total Commits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.totalFileChanges }}</div>
+        <div class="stat-label">File Changes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.uniqueFilesTracked }}</div>
+        <div class="stat-label">Unique Files</div>
+      </div>
+    </div>
+
+    @if (stats.dateRange.minDate) {
+      <div class="date-range">
+        <strong>Date Range:</strong>
+        {{ stats.dateRange.minDate | date:'short' }} -
+        {{ stats.dateRange.maxDate | date:'short' }}
+      </div>
+    }
+  }
+</div>

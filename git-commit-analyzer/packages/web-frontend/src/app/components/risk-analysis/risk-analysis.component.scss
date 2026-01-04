@@ -1,0 +1,105 @@
+.risk-analysis {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type='number'] {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  th,
+  td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+  }
+
+  tr:hover {
+    background: #f9f9f9;
+  }
+
+  .file-path {
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+
+  .number {
+    text-align: right;
+    font-family: monospace;
+  }
+}
+
+.risk-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: bold;
+
+  &.high {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  &.medium {
+    background: #fff3e0;
+    color: #ef6c00;
+  }
+
+  &.low {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 16px;
+  border-radius: 8px;
+}

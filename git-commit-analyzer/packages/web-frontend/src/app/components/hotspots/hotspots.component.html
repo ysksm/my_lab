@@ -1,0 +1,48 @@
+<div class="hotspots">
+  <div class="header">
+    <h2>Hotspots - Frequently Changed Files</h2>
+    <div class="controls">
+      <label>
+        Limit:
+        <input type="number" [(ngModel)]="limit" (change)="loadHotspots()" min="1" max="100" />
+      </label>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && hotspots.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>File Path</th>
+          <th>Changes</th>
+          <th>Insertions</th>
+          <th>Deletions</th>
+          <th>Churn</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (hotspot of hotspots; track hotspot.filePath) {
+          <tr>
+            <td class="file-path">{{ hotspot.filePath }}</td>
+            <td class="number">{{ hotspot.changeCount }}</td>
+            <td class="number insertions">+{{ hotspot.totalInsertions }}</td>
+            <td class="number deletions">-{{ hotspot.totalDeletions }}</td>
+            <td class="number">{{ hotspot.churn }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && hotspots.length === 0) {
+    <div class="empty">No data available</div>
+  }
+</div>

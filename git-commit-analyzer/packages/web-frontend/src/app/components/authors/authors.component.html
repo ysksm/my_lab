@@ -1,0 +1,40 @@
+<div class="authors">
+  <h2>Author Statistics</h2>
+
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (!loading && authors.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Author</th>
+          <th>Commits</th>
+          <th>Files Touched</th>
+          <th>Insertions</th>
+          <th>Deletions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (author of authors; track author.authorName) {
+          <tr>
+            <td>{{ author.authorName }}</td>
+            <td class="number">{{ author.commitCount }}</td>
+            <td class="number">{{ author.filesTouched }}</td>
+            <td class="number insertions">+{{ author.totalInsertions }}</td>
+            <td class="number deletions">-{{ author.totalDeletions }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && authors.length === 0) {
+    <div class="empty">No author data available</div>
+  }
+</div>
