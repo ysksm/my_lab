@@ -1,0 +1,11 @@
+{
+  "name": "@ssh-tool/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "ssh-tool": "src/index.ts"
+  },
+  "dependencies": {
+    "@ssh-tool/core": "workspace:*"
+  }
+}

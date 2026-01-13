@@ -1,0 +1,16 @@
+{
+  "name": "ssh-command-tool3",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "cli": "bun run packages/cli/src/index.ts",
+    "gui": "bun run packages/gui/src/server.ts",
+    "build": "bun run --filter '*' build",
+    "test": "bun test packages/core/src/test --ignore-pattern 'integration'",
+    "test:integration": "bun test packages/core/src/test/integration.test.ts",
+    "test:all": "bun test packages/core/src/test",
+    "test:watch": "bun test packages/core/src/test --watch --ignore-pattern 'integration'"
+  }
+}
